@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .eye-icon {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    a {
+      display: block;
+      margin-top: 10px;
+      text-decoration: none;
+      color: #00ff41;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* تنسيق الزر الصغير لحذف الحساب */
+    #delete-account-btn {
+      display: inline-block;
+      padding: 5px 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+
+    #delete-account-btn:hover {
+      background-color: darkred;
+    }
+
+    /* تنسيق النص الخاص بالأدمن */
+    .admin-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .admin-link a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .admin-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>تسجيل الدخول</h1>
+    <form id="login-form">
+      <div style="position: relative;">
+        <input type="email" id="login-email" placeholder="البريد الإلكتروني" required>
+      </div>
+      
+      <div style="position: relative;">
+        <input type="password" id="login-password" placeholder="كلمة المرور" required>
+        <span class="eye-icon" onclick="togglePassword('login-password')">👁️</span>
+      </div>
+
+      <button type="submit">تسجيل الدخول</button>
+    </form>
+
+    <div>
+      <!-- الروابط مع الزر الصغير لحذف الحساب -->
+      <a href="recover-account.html">نسيت كلمة المرور؟</a>
+      <a href="signup.html">تسجيل عضو جديد</a>
+      <button id="delete-account-btn" onclick="window.location.href = 'delete-account.html'">حذف الحساب</button>
+    </div>
+
+    <div class="admin-link">
+      هل أنت أدمن في الصفحة؟ <a href="admin.html">ادخل من هنا</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+
+      // استرجاع بيانات المستخدم من localStorage باستخدام البريد الإلكتروني
+      const storedData = JSON.parse(localStorage.getItem(email));
+
+      // التحقق إذا كانت البيانات موجودة
+      if (!storedData) {
+        alert("البريد الإلكتروني غير موجود!");
+        return;
+      }
+
+      // التحقق من كلمة المرور
+      if (storedData.password === password) {
+        alert("تم تسجيل الدخول بنجاح!");
+        // حفظ البريد الإلكتروني في 'userEmail' ليتمكن من الوصول إليه في صفحة البروفايل
+        localStorage.setItem('userEmail', email);
+        window.location.href = "profile.html";  // الانتقال إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      } else {
+        alert("البريد الإلكتروني أو كلمة المرور غير صحيحة!");
+      }
+    });
+
+    // دالة لإظهار/إخفاء كلمة المرور
+    function togglePassword(id) {
+      const passwordField = document.getElementById(id);
+      const type = passwordField.type === 'password' ? 'text' : 'password';
+      passwordField.type = type;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدخال كود التحقق</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #resend-button:disabled {
+      background-color: #f44336; /* لون أحمر */
+      cursor: not-allowed; /* تغيير المؤشر إلى علامة بلوك */
+      color: white;
+    }
+    #countdown {
+      font-size: 14px;
+      color: #f44336; /* اللون الأحمر */
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>إدخال كود التحقق</h1>
+    <form id="verify-form">
+      <input type="text" id="verify-code" placeholder="أدخل كود التحقق" required>
+      <button type="submit">تحقق</button>
+    </form>
+    <a href="login.html">العودة إلى تسجيل الدخول</a>
+    <button id="resend-button" onclick="resendCode()">إعادة إرسال كود التحقق</button>
+    <p id="countdown">سوف تتمكن من إعادة إرسال الكود بعد <span id="time-left">60</span> ثانية</p>
+  </div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    emailjs.init("JG8o0IxvnCZNBYK2a");
+
+    // التحقق من الكود المدخل
+    document.getElementById('verify-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const enteredCode = document.getElementById("verify-code").value;
+      const storedCode = localStorage.getItem("verificationCode"); // جلب الكود من localStorage
+
+      if (enteredCode === storedCode) {
+        alert("تم التحقق بنجاح! سيتم توجيهك إلى صفحة البروفايل.");
+
+        // استرجاع بيانات المستخدم من localStorage
+        const email = localStorage.getItem("userEmail");
+        const userData = JSON.parse(localStorage.getItem(email)); // جلب جميع بيانات المستخدم
+        
+        if (userData) {
+          // تخزين بيانات المستخدم في localStorage للمرة الثانية إذا لزم الأمر
+          localStorage.setItem("userData", JSON.stringify(userData));
+
+          // توجيه المستخدم إلى صفحة البروفايل
+          window.location.href = "profile.html"; 
+        } else {
+          alert("حدث خطأ في استرجاع بيانات المستخدم.");
+        }
+      } else {
+        alert("كود التحقق غير صحيح. حاول مرة أخرى.");
+      }
+    });
+
+    // إعادة إرسال الكود
+    function resendCode() {
+      const email = localStorage.getItem("userEmail");
+      if (!email) {
+        alert("البريد الإلكتروني غير متوفر.");
+        return;
+      }
+
+      const newCode = Math.floor(100000 + Math.random() * 900000); // كود جديد
+      localStorage.setItem("verificationCode", newCode); // تحديث الكود في localStorage
+
+      const templateParams = {
+        email: email,
+        code: newCode
+      };
+
+      emailjs.send("service_tp0no8k", "template_tr39wol", templateParams)
+        .then(() => {
+          alert("تم إرسال كود تحقق جديد إلى بريدك الإلكتروني.");
+        })
+        .catch((error) => {
+          console.error("فشل في إرسال الكود:", error);
+          alert("حدث خطأ أثناء إعادة إرسال الكود. حاول مرة أخرى.");
+        });
+
+      // تعطيل زر إعادة إرسال الكود لمدة 60 ثانية
+      const resendButton = document.getElementById("resend-button");
+      const countdown = document.getElementById("countdown");
+      const timeLeft = document.getElementById("time-left");
+      resendButton.disabled = true; // تعطيل الزر
+      countdown.style.display = "block"; // إظهار العد التنازلي
+      let timeRemaining = 60; // الوقت المتبقي بالثواني
+
+      // تحديث العد التنازلي
+      const interval = setInterval(() => {
+        timeRemaining--;
+        timeLeft.textContent = timeRemaining; // تحديث النص
+
+        if (timeRemaining <= 0) {
+          clearInterval(interval); // إيقاف العد التنازلي
+          resendButton.disabled = false; // تمكين الزر بعد 60 ثانية
+          countdown.style.display = "none"; // إخفاء العد التنازلي
+        }
+      }, 1000); // تحديث العد التنازلي كل ثانية
+    }
+  </script>
+</body>
+</html>

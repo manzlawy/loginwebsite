@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استرداد الحساب</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>استرداد الحساب</h1>
+    <form id="recover-form">
+      <input type="email" id="recover-email" placeholder="البريد الإلكتروني" required>
+      <button type="submit">إرسال كود التحقق</button>
+    </form>
+    <a href="login.html">العودة إلى تسجيل الدخول</a>
+  </div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    // إعداد EmailJS
+    emailjs.init("JG8o0IxvnCZNBYK2a");
+
+    document.getElementById('recover-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById("recover-email").value;
+      const storedData = localStorage.getItem(email);
+
+      // التحقق من وجود البريد الإلكتروني في localStorage
+      if (!storedData) {
+        alert("البريد الإلكتروني غير مسجل! يرجى التأكد من صحة البريد.");
+        return;
+      }
+
+      // توليد كود عشوائي
+      const verificationCode = Math.floor(100000 + Math.random() * 900000); // كود مكون من 6 أرقام
+      localStorage.setItem("verificationCode", verificationCode); // تخزين الكود في localStorage
+      localStorage.setItem("userEmail", email); // تخزين البريد في localStorage
+
+      // إرسال الكود بالبريد الإلكتروني
+      const templateParams = {
+        email: email,
+        code: verificationCode
+      };
+
+      emailjs.send("service_tp0no8k", "template_tr39wol", templateParams)
+        .then(() => {
+          alert("تم إرسال كود التحقق إلى بريدك الإلكتروني.");
+          window.location.href = "verify-code.html"; // الانتقال إلى صفحة إدخال كود التحقق
+        })
+        .catch((error) => {
+          console.error("فشل في إرسال الكود:", error);
+          alert("حدث خطأ أثناء إرسال الكود. حاول مرة أخرى.");
+        });
+    });
+  </script>
+</body>
+</html>

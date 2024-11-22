@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الملف الشخصي</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .profile-image {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      margin: 10px 0;
+      border: 5px solid white;
+      object-fit: cover;
+    }
+    .input-field {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .input-field input {
+      padding: 8px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 250px;
+    }
+    .input-field button {
+      padding: 8px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .save-changes-button {
+      padding: 12px 20px;
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .upload-button {
+      padding: 10px 15px;
+      cursor: pointer;
+      background-color: #ffc107;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .change-password-button {
+      padding: 10px 15px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>الملف الشخصي</h1>
+    <img id="profile-image" class="profile-image" src="https://via.placeholder.com/150?text=%D8%A3%D8%B6%D9%81+%D8%B5%D9%88%D8%B1%D8%A9" alt="صورة الملف الشخصي">
+
+    <form id="profile-form">
+      <div class="input-field">
+        <input type="text" id="username" placeholder="اسم المستخدم" required>
+      </div>
+      <div class="input-field">
+        <input type="email" id="email" placeholder="البريد الإلكتروني" disabled>
+      </div>
+      <div class="input-field">
+        <input type="tel" id="phone" placeholder="رقم الهاتف" required>
+      </div>
+      <!-- حقل كلمة المرور -->
+      <div class="input-field">
+        <input type="password" id="password" placeholder="كلمة المرور" required>
+        <button type="button" id="toggle-password" style="background: none; border: none; cursor: pointer; font-size: 16px;">👁️</button>
+      </div>
+      <button class="upload-button" type="button" onclick="uploadImage()">رفع صورة شخصية</button>
+      <button class="save-changes-button" type="submit">حفظ التغييرات</button>
+    </form>
+
+    <!-- زر تغيير كلمة المرور -->
+    <button class="change-password-button" onclick="window.location.href = 'change-password.html'">تغيير كلمة المرور</button>
+  </div>
+
+  <script>
+    window.onload = function() {
+      // تأكد من وجود البريد الإلكتروني في localStorage
+      const email = localStorage.getItem('userEmail');
+      if (!email) {
+        alert("يرجى تسجيل الدخول أولاً.");
+        window.location.href = 'login.html'; // توجيه المستخدم إلى صفحة تسجيل الدخول
+        return;
+      }
+
+      // استرجاع بيانات المستخدم من localStorage
+      const userData = JSON.parse(localStorage.getItem(email));
+      if (userData) {
+        document.getElementById('username').value = userData.username;
+        document.getElementById('email').value = userData.email;
+        document.getElementById('phone').value = userData.phone;
+        document.getElementById('profile-image').src = userData.profileImage || 'https://via.placeholder.com/150?text=%D8%A3%D8%B6%D9%81+%D8%B5%D9%88%D8%B1%D8%A9';
+        document.getElementById('password').value = userData.password || '';
+      }
+    }
+
+    // حفظ التغييرات التي يقوم بها المستخدم
+    document.getElementById('profile-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email = localStorage.getItem('userEmail');
+      const username = document.getElementById('username').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+
+      // استرجاع بيانات المستخدم من localStorage
+      const userData = JSON.parse(localStorage.getItem(email));
+      if (userData) {
+        userData.username = username;
+        userData.phone = phone;
+        userData.password = password;
+        
+        // حفظ البيانات المعدلة في localStorage
+        localStorage.setItem(email, JSON.stringify(userData));
+        alert('تم حفظ التغييرات بنجاح!');
+        window.location.href = 'welcome.html';  // توجيه المستخدم إلى صفحة الترحيب بعد حفظ التغييرات
+      }
+    });
+
+    // رفع صورة الملف الشخصي
+    function uploadImage() {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const userData = JSON.parse(localStorage.getItem(localStorage.getItem('userEmail')));
+          userData.profileImage = event.target.result;
+          document.getElementById('profile-image').src = event.target.result;
+          localStorage.setItem(userData.email, JSON.stringify(userData));
+        }
+        reader.readAsDataURL(e.target.files[0]);
+      });
+      fileInput.click();
+    }
+
+    // إظهار/إخفاء كلمة المرور
+    const togglePasswordButton = document.getElementById('toggle-password');
+    togglePasswordButton.addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordButton.textContent = '🙈';
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordButton.textContent = '👁️';
+      }
+    });
+  </script>
+</body>
+</html>

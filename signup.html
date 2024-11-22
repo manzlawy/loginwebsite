@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الأعضاء الجدد</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .input-field {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+    .input-field input {
+      padding: 8px;
+      border-radius: 5px;
+      width: 100%;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+    }
+    .input-field button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>تسجيل الأعضاء الجدد</h1>
+    <form id="signup-form">
+      <div class="input-field">
+        <input type="text" id="username" placeholder="اسم المستخدم" required>
+      </div>
+      <div class="input-field">
+        <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+      </div>
+      <div class="input-field">
+        <input type="tel" id="phone" placeholder="رقم الهاتف" required>
+      </div>
+      <div class="input-field">
+        <input type="password" id="password" placeholder="كلمة المرور" required>
+        <button type="button" onclick="togglePassword()">👁️</button>
+      </div>
+      <div class="input-field">
+        <input type="password" id="confirm-password" placeholder="تأكيد كلمة المرور" required>
+      </div>
+      <button type="submit">إنشاء الحساب</button>
+    </form>
+    <p id="error-message" style="color: red; display: none;">تم التسجيل بهذا البريد الإلكتروني من قبل. يرجى إدخال بريد آخر.</p>
+    <a href="login.html">هل لديك حساب بالفعل؟ سجل دخول</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function() {
+      emailjs.init("JG8o0IxvnCZNBYK2a"); // خدمة EmailJS
+    })();
+
+    function togglePassword() {
+      const passwordField = document.getElementById('password');
+      const type = passwordField.type === 'password' ? 'text' : 'password';
+      passwordField.type = type;
+    }
+
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      // تحقق من وجود البريد الإلكتروني في localStorage
+      if (localStorage.getItem(email)) {
+        document.getElementById('error-message').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('error-message').style.display = 'none';
+      }
+
+      if (password !== confirmPassword) {
+        alert('كلمات المرور غير متطابقة');
+        return;
+      }
+
+      const user = {
+        username: username,
+        email: email,
+        phone: phone,
+        password: password,
+        profileImage: '',  // افتراضياً ليس لديه صورة شخصية
+      };
+
+      // تخزين بيانات المستخدم في localStorage باستخدام البريد الإلكتروني
+      localStorage.setItem(email, JSON.stringify(user));
+
+      // توليد كود التحقق
+      const verificationCode = Math.floor(100000 + Math.random() * 900000); // كود مكون من 6 أرقام
+
+      const templateParams = {
+        email: email,
+        name: username,
+        code: verificationCode, // إرسال الكود في القالب
+      };
+
+      // إرسال الكود عبر EmailJS
+      emailjs.send("service_tp0no8k", "template_tr39wol", templateParams)
+        .then(() => {
+          // تخزين الكود في localStorage لمقارنته لاحقًا
+          localStorage.setItem('verificationCode', verificationCode);
+          alert("تم إنشاء الحساب بنجاح! تم إرسال كود التحقق إلى بريدك الإلكتروني.");
+          window.location.href = 'verify1-code.html'; // الانتقال إلى صفحة التحقق
+        })
+        .catch((error) => {
+          console.error("فشل في إرسال الكود:", error);
+          alert("حدث خطأ أثناء إرسال البريد الإلكتروني. حاول مرة أخرى.");
+        });
+    });
+  </script>
+</body>
+</html>

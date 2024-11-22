@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الحسابات</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      color: #333;
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    form {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    input {
+      padding: 8px;
+      width: 90%;
+      max-width: 300px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .email-list {
+      margin-top: 20px;
+    }
+
+    .email-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin: 10px 0;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .email-item p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .email-item .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .delete-btn {
+      background-color: #ff5e5e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background-color: #e53935;
+    }
+
+    .profile-btn {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .profile-btn:hover {
+      background-color: #1976D2;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .search-container input {
+      width: 70%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .search-container button {
+      margin-left: 10px;
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .search-container button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>إدارة الحسابات</h1>
+    <form id="admin-form">
+      <input type="password" id="admin-password" placeholder="أدخل كلمة المرور" required>
+      <button type="submit">دخول</button>
+    </form>
+
+    <div id="email-list-container" style="display: none;">
+      <div class="search-container">
+        <input type="text" id="search" placeholder="ابحث عن حساب...">
+        <button onclick="searchAccounts()">بحث</button>
+      </div>
+      <h2 style="text-align:center; margin-bottom: 10px;">قائمة الحسابات</h2>
+      <div id="email-list" class="email-list">
+        <!-- الحسابات ستظهر هنا -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('admin-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const password = document.getElementById('admin-password').value;
+
+      if (password === 'Mo139726845772008') {
+        alert('تم الدخول بنجاح!');
+        document.getElementById('admin-form').style.display = 'none';
+        document.getElementById('email-list-container').style.display = 'block';
+        loadEmails();
+      } else {
+        alert('كلمة المرور غير صحيحة!');
+      }
+    });
+
+    function loadEmails() {
+      const emailListContainer = document.getElementById('email-list');
+      emailListContainer.innerHTML = '';
+
+      let accountsFound = false;
+      for (const key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          try {
+            const userData = JSON.parse(localStorage.getItem(key));
+            if (userData && userData.email && userData.password) {
+              accountsFound = true;
+              const emailItem = document.createElement('div');
+              emailItem.classList.add('email-item');
+              emailItem.innerHTML = `
+                <p><strong>الحساب:</strong> ${userData.email}</p>
+                <p><strong>كلمة المرور:</strong> ${userData.password}</p>
+                <div class="actions">
+                  <button class="delete-btn" onclick="deleteAccount('${userData.email}')">حذف</button>
+                  <button class="profile-btn" onclick="goToProfile('${userData.email}')">الملف الشخصي</button>
+                </div>
+              `;
+              emailListContainer.appendChild(emailItem);
+            }
+          } catch (error) {
+            console.error('فشل في تحليل بيانات المستخدم:', error);
+          }
+        }
+      }
+
+      if (!accountsFound) {
+        emailListContainer.innerHTML = "<p style='text-align: center;'>لا توجد حسابات مسجلة.</p>";
+      }
+    }
+
+    function deleteAccount(email) {
+      if (confirm('هل تريد حذف هذا الحساب؟')) {
+        localStorage.removeItem(email);
+        alert('تم حذف الحساب!');
+        document.getElementById('search').value = ''; // تفريغ البحث
+        loadEmails(); // إعادة تحميل الحسابات
+      }
+    }
+
+    function goToProfile(email) {
+      localStorage.setItem('userEmail', email);
+      window.location.href = 'profile.html';
+    }
+
+    function searchAccounts() {
+      const searchQuery = document.getElementById('search').value.toLowerCase();
+      const emailItems = document.querySelectorAll('.email-item');
+
+      emailItems.forEach(item => {
+        const emailText = item.querySelector('p').textContent.toLowerCase();
+        item.style.display = emailText.includes(searchQuery) ? 'block' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>
